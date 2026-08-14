@@ -37,11 +37,19 @@ def detect_shell_dimensions(all_lines):
     This is signaled by a [5D], [7F], [5D7F], [5D10F], or [9G] tag
     somewhere in the file. Defaults to Cartesian (6D/10F/15G) if no
     such tag is found.
+
+    Only lines that are themselves bracketed section tags (e.g. a line
+    that is exactly "[5D]") are checked -- NOT a blind substring search
+    over the whole file. MOLPRO writes exponents in Fortran D-notation
+    (e.g. "0.2740600135D-01"), and a naive substring search for "5d"
+    will spuriously match inside such numbers (".....35D-01" contains
+    "5d"), incorrectly flipping the file into spherical mode even when
+    no such tag exists.
     """
-    text = ''.join(all_lines).lower()
-    d_dim = 5 if '5d' in text else 6
-    f_dim = 7 if '7f' in text else 10
-    g_dim = 9 if '9g' in text else 15
+    tags = {line.strip().lower() for line in all_lines if line.strip().startswith('[')}
+    d_dim = 5 if any('5d' in tag for tag in tags) else 6
+    f_dim = 7 if any('7f' in tag for tag in tags) else 10
+    g_dim = 9 if any('9g' in tag for tag in tags) else 15
     return {'s': 1, 'p': 3, 'd': d_dim, 'f': f_dim, 'g': g_dim}
 
 
