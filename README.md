@@ -54,3 +54,31 @@ A plain-text file (name specified at runtime) listing the orbitals matching the 
 
 - Atom indices are matched as strings, so make sure the indices you enter match the atom numbering exactly as it appears in the MOLPRO output.
 - For antibonding partner search, "strict opposite sign" matching requires every `(atom, mu, type)` triple present in the reference orbital to also appear in the candidate orbital with an opposite-sign coefficient — this is a stricter criterion than the ranked "top candidates" list, which allows partial overlap.
+
+## scrub_molden_sym.py
+
+Removes `Sym=` lines from a MOLPRO-generated `.molden` file. MOLPRO writes a `Sym=` label on each molecular orbital line in `.molden` output, which some visualization software (e.g. VMD) cannot parse — this causes orbital data to appear unreadable. This script strips all `Sym=` lines and writes the result to a new file, leaving the original file untouched.
+
+### Requirements
+
+- Python 3
+- No external dependencies (uses only the standard library: `sys`)
+
+### Usage
+
+```bash
+python scrub_molden_sym.py <input.molden> <output.molden>
+```
+
+Example:
+```bash
+python scrub_molden_sym.py edgn2n2coms5cas1.molden edgn2n2coms5casorbitals1.molden
+```
+
+### Input format
+
+Any `.molden` file. No specific MOLPRO directive is required — the script simply removes any line containing the substring `Sym=`.
+
+### Output
+
+A copy of the input file with all `Sym=` lines removed, written to the specified output path. The original file is not modified.
